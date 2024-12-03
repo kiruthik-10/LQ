@@ -1,0 +1,11 @@
+<p><!DOCTYPE html> <html lang=&quot;en&quot;> <head>  <meta charset=&quot;UTF-8&quot;>  <meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;>  <title>Least Squares Solver</title>  <script src=&quot;https://cdnjs.cloudflare.com/ajax/libs/numeric/1.2.6/numeric.min.js&quot;></script> </head> <body>  <h1>Least Squares Solver for Ax = B</h1>  <form id=&quot;leastSquaresForm&quot;>  <h3>Matrix A (comma-separated rows)</h3>  <textarea id=&quot;matrixA&quot; rows=&quot;4&quot; cols=&quot;50&quot; placeholder=&quot;e.g. 1,2,3;4,5,6&quot;></textarea>  <h3>Vector B (comma-separated values)</h3>  <input type=&quot;text&quot; id=&quot;vectorB&quot; placeholder=&quot;e.g. 7,8&quot; />  <button type=&quot;button&quot; onclick=&quot;solveLeastSquares()&quot;>Solve</button>  </form>  <h3>Solution x:</h3>  <pre id=&quot;solution&quot;></pre></p>
+
+<p> <script>  function solveLeastSquares() {  const AInput = document.getElementById('matrixA').value;  const BInput = document.getElementById('vectorB').value;</p>
+
+<p> // Parse matrix A  const A = AInput.split(';').map(row => row.split(',').map(Number));  // Parse vector B  const B = BInput.split(',').map(Number);</p>
+
+<p> // Convert to numeric.js format  const A_matrix = numeric.clone(A);  const B_vector = numeric.clone(B);</p>
+
+<p> // Calculate least squares solution  const AT = numeric.transpose(A_matrix);  const ATA = numeric.dot(AT, A_matrix);  const ATB = numeric.dot(AT, B_vector);  const x = numeric.solve(ATA, ATB);</p>
+
+<p> // Display the result  document.getElementById('solution').textContent = JSON.stringify(x, null, 2);  }  </script> </body> </html></p>
