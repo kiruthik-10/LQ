@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Least Squares Solver</title>
+    <script>
+        function solveLeastSquares() {
+            const matrixAInput = document.getElementById('matrixA').value.trim();
+            const vectorBInput = document.getElementById('vectorB').value.trim();
+
+            const A = matrixAInput.split('\n').map(row => row.trim().split(/\s+/).map(Number));
+            const B = vectorBInput.split(/\s+/).map(Number);
+
+            if (A.length !== B.length) {
+                alert("Matrix A and vector B must have the same number of rows.");
+                return;
+            }
+
+            if (!isValidMatrix(A) || !isValidVector(B)) {
+                alert("Invalid input! Ensure all elements are numbers.");
+                return;
+            }
+
+            const At = transpose(A);
+            const AtA = multiplyMatrices(At, A);
+            const AtB = multiplyMatrixVector(At, B);
+
+            try {
+                const x = gaussianElimination(AtA, AtB);
+                document.getElementById('result').innerText = `Solution: x = [${x.join(', ')}]`;
+            } catch (error) {
+                alert("Error solving the system: " + error.message);
+            }
+        }
+
+        function transpose(matrix) {
+            return matrix[0].map((_, colIndex) => matrix.map(row => row[colIndex]));
+        }
+
+        function multiplyMatrices(A, B) {
+            const result = Array(A.length).fill(0).map(() => Array(B[0].length).fill(0));
+            for (let i = 0; i < A.length; i++) {
+                for (let j = 0; j < B[0].length; j++) {
+                    for (let k = 0; k < A[0].length; k++) {
+                        result[i][j] += A[i][k] * B[k][j];
+                    }
+                }
+            }
+            return result;
+        }
+
+        function multiplyMatrixVector(A, B) {
+            return A.map(row => row.reduce((sum, val, index) => sum + val * B[index], 0));
+        }
+
+        function gaussianElimination(A, B) {
+            const n = A.length;
+            for (let i = 0; i < n; i++) {
+                let max = i;
+                for (let j = i + 1; j < n; j++) {
+                    if (Math.abs(A[j][i]) > Math.abs(A[max][i])) max = j;
+                }
+                [A[i], A[max]] = [A[max], A[i]];
+                [B[i], B[max]] = [B[max], B[i]];
+
+                for (let j = i + 1; j < n; j++) {
+                    const factor = A[j][i] / A[i][i];
+                    for (let k = i; k < n; k++) {
+                        A[j][k] -= factor * A[i][k];
+                    }
+                    B[j] -= factor * B[i];
+                }
+            }
+
+            const x = Array(n).fill(0);
+            for (let i = n - 1; i >= 0; i--) {
+                x[i] = B[i] / A[i][i];
+                for (let j = i - 1; j >= 0; j--) {
+                    B[j] -= A[j][i] * x[i];
+                }
+            }
+            return x;
+        }
+
+        function isValidMatrix(matrix) {
+            return matrix.every(row => row.every(val => !isNaN(val)));
+        }
+
+        function isValidVector(vector) {
+            return vector.every(val => !isNaN(val));
+        }
+    </script>
+</head>
+<body>
+    <h1>Least Squares Solver</h1>
+    <p>Enter the matrix \( A \) (one row per line, values separated by spaces):</p>
+    <textarea id="matrixA" rows="5" cols="30"></textarea>
+    <p>Enter the vector \( B \) (values separated by spaces):</p>
+    <textarea id="vectorB" rows="2" cols="30"></textarea>
+    <br><br>
+    <button onclick="solveLeastSquares()">Solve</button>
+    <p id="result"></p>
+</body>
+</html>
